@@ -1,0 +1,12 @@
+# Godot-specific ignores
+.godot/
+*.uid
+
+# Godot import files
+*.import
+
+# Exported projects
+export/
+
+# macOS
+.DS_Store
