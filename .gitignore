@@ -2,9 +2,6 @@
 .godot/
 *.uid
 
-# Godot import files
-*.import
-
 # Exported projects
 export/
 
