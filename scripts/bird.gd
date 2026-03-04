@@ -24,8 +24,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_yaw   -= event.relative.x * mouse_sensitivity
 		_pitch -= event.relative.y * mouse_sensitivity
 		_pitch  = clamp(_pitch,
-		                deg_to_rad(pitch_limit_down),
-		                deg_to_rad(pitch_limit_up))
+						deg_to_rad(pitch_limit_down),
+						deg_to_rad(pitch_limit_up))
 	if event.is_action_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
