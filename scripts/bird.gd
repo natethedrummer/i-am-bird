@@ -46,7 +46,7 @@ func _physics_process(delta: float) -> void:
 	# Horizontal airspeed generates upward force. At ~25 m/s the bird can
 	# glide indefinitely; below ~5 m/s it will lose altitude and stall.
 	var horiz_speed := Vector2(velocity.x, velocity.z).length()
-	var lift        := clamp(lift_coefficient * horiz_speed, 0.0, gravity_strength)
+	var lift        := clampf(lift_coefficient * horiz_speed, 0.0, gravity_strength)
 	velocity.y += lift * delta
 
 	# ── Pitch authority ───────────────────────────────────────────────────
