@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://crnapr8tw5jnj"]
 
 [ext_resource type="Script" uid="uid://cbgjxnuxmjjmn" path="res://scripts/bird.gd" id="1_bird"]
+[ext_resource type="PackedScene" path="res://assets/models/bird.glb" id="2_bird_model"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.2, 0.46, 0.85, 1)
@@ -58,6 +59,9 @@ script = ExtResource("1_bird")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Bird" unique_id=1724464868]
 shape = SubResource("CapsuleShape3D_bird")
+
+[node name="BirdModel" parent="Bird" instance=ExtResource("2_bird_model")]
+transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Bird" unique_id=285817794]
 transform = Transform3D(1, 0, 0, 0, 0.928, -0.371, 0, 0.371, 0.928, 0, 2, 5)
