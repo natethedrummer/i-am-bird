@@ -15,6 +15,7 @@ extends CharacterBody3D
 var _yaw: float = 0.0
 var _pitch: float = 0.0
 var _flap_timer: float = 0.0
+var is_landed: bool = false  ## exposed for animation / other systems
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -31,6 +32,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	_flap_timer -= delta
+	is_landed = is_on_floor()
 
 	# Nose direction from mouse-driven yaw + pitch
 	var forward := Vector3(
@@ -39,31 +41,42 @@ func _physics_process(delta: float) -> void:
 		-cos(_yaw) * cos(_pitch)
 	).normalized()
 
-	# ── Gravity ───────────────────────────────────────────────────────────
-	velocity.y -= gravity_strength * delta
+	if is_landed:
+		# ── Grounded ──────────────────────────────────────────────────────
+		# Kill all velocity; bird perches in place.
+		velocity = Vector3.ZERO
 
-	# ── Lift ──────────────────────────────────────────────────────────────
-	# Horizontal airspeed generates upward force. At ~25 m/s the bird can
-	# glide indefinitely; below ~5 m/s it will lose altitude and stall.
-	var horiz_speed := Vector2(velocity.x, velocity.z).length()
-	var lift        := clampf(lift_coefficient * horiz_speed, 0.0, gravity_strength)
-	velocity.y += lift * delta
+		# ── Takeoff flap ──────────────────────────────────────────────────
+		if Input.is_action_just_pressed("ui_accept") and _flap_timer <= 0.0:
+			velocity.y  = flap_up
+			velocity   += forward * flap_forward
+			_flap_timer = flap_cooldown
+	else:
+		# ── Gravity ───────────────────────────────────────────────────────
+		velocity.y -= gravity_strength * delta
 
-	# ── Pitch authority ───────────────────────────────────────────────────
-	# Nose-up climbs (bleeding speed); nose-down dives (gaining speed).
-	velocity += forward * sin(_pitch) * 6.0 * delta
+		# ── Lift ──────────────────────────────────────────────────────────
+		# Horizontal airspeed generates upward force. At ~25 m/s the bird can
+		# glide indefinitely; below ~5 m/s it will lose altitude and stall.
+		var horiz_speed := Vector2(velocity.x, velocity.z).length()
+		var lift        := clampf(lift_coefficient * horiz_speed, 0.0, gravity_strength)
+		velocity.y += lift * delta
 
-	# ── Drag ──────────────────────────────────────────────────────────────
-	velocity -= velocity * drag_coefficient * delta
+		# ── Pitch authority ───────────────────────────────────────────────
+		# Nose-up climbs (bleeding speed); nose-down dives (gaining speed).
+		velocity += forward * sin(_pitch) * 6.0 * delta
 
-	# ── Flap (Space / ui_accept) ─────────────────────────────────────────
-	if Input.is_action_just_pressed("ui_accept") and _flap_timer <= 0.0:
-		velocity.y  += flap_up
-		velocity    += forward * flap_forward
-		_flap_timer  = flap_cooldown
+		# ── Drag ──────────────────────────────────────────────────────────
+		velocity -= velocity * drag_coefficient * delta
+
+		# ── Flap (Space / ui_accept) ─────────────────────────────────────
+		if Input.is_action_just_pressed("ui_accept") and _flap_timer <= 0.0:
+			velocity.y  += flap_up
+			velocity    += forward * flap_forward
+			_flap_timer  = flap_cooldown
 
 	# ── Body orientation ──────────────────────────────────────────────────
 	rotation.y = _yaw
-	rotation.x = _pitch * 0.65   # body tilts with nose direction
+	rotation.x = _pitch * 0.65 if not is_landed else 0.0  # sit flat when perched
 
 	move_and_slide()
